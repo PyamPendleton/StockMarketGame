@@ -7,7 +7,7 @@ import yfinance as yf
 # Fibonacci Retracement calculator #
 def fib_retracement(name, period, interval):
   ticker = yf.Ticker(name)
-  df = ticker.history(period=period,interval=interval)
+  df = yf.download(name, period=period, interval=interval)
   highest_swing = -1
   lowest_swing = -1
 
@@ -19,7 +19,7 @@ def fib_retracement(name, period, interval):
 
 
   ratios = [0,0.236, 0.382, 0.5 , 0.618, 0.786,1]
-  colors = ["black","r","g","b","cyan","magenta","yellow"]
+  colors = ["black","r","g","b","cyan","magenta","orange"]
   levels = []
 
   max_level = df['High'][highest_swing]
@@ -36,15 +36,16 @@ def fib_retracement(name, period, interval):
 
   plt.rc('font', size=14)
 
-  df['Close'].plot(title="Fibonacci Retracement overlayed on "+name+" prices")
+  df['Adj Close'].plot(title="Fibonacci Retracement overlayed on "+name+" prices")
   start_date = df.index[min(highest_swing,lowest_swing)]
   end_date = df.index[max(highest_swing,lowest_swing)]
   for i in range(len(levels)):
-    plt.hlines(levels[i],start_date, end_date,label="{:.1f}%".format(ratios[i]*100),colors=colors[i], linestyles="dashed")
+    plt.hlines(levels[i], start_date, end_date,label="{:.1f}%".format(ratios[i]*100),colors=colors[i], linestyles="dashed")
 
   plt.legend()
   plt.savefig("fib_retrace_"+name+".png")
 ####################################
+
 
 
 ####################################
