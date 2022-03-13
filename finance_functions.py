@@ -61,14 +61,14 @@ def golden_cross(name, period, interval):
   df = df.dropna() 
 
   # We compute our 50 SMA > 200 SMA
-  df["golden_cross_signal"] = df.apply(lambda row: 1 if row[f"50_sma"] > row[f"200_sma"]  else 0, axis=1)
+  df["golden_cross"] = df.apply(lambda row: 1 if row[f"50_sma"] > row[f"200_sma"]  else 0, axis=1)
 
   # To store when our golden cross are happening
   list_golden_cross_ts = []
   first_golden_cross = False
 
   # We take the date where the first 50 SMA > 200 SMA appears
-  for idx, each in df["golden_cross_signal"].iteritems():
+  for idx, each in df["golden_cross"].iteritems():
       if each == 1:
           # If its the first golden cross we see we add the timestamp
           if first_golden_cross:
@@ -82,10 +82,118 @@ def golden_cross(name, period, interval):
   df[["200_sma","50_sma","Adj Close"]].plot(figsize=(8,4), grid=True, title="SMA 50 vs SMA 200 on "+name+" prices", ax=axes)
 
   for each in list_golden_cross_ts:
-      axes.axvline(x=each, label="Golden Cross", c="yellow")
+      axes.axvline(x=each, label="Golden Cross", c="gold")
       
   axes.legend()
   fig.tight_layout()
   plt.savefig("golden_cross_"+name+".png")
 ####################################
+
+
+
+####################################
+# Death Cross calculator           #
+def death_cross(name, period, interval):
+  df = yf.download(name, period=period, interval=interval)
+
+  # We compute our simple moving averages
+  df["50_sma"] = df["Adj Close"].rolling(50).mean()
+  df["200_sma"] = df["Adj Close"].rolling(200).mean()
+
+  # This is important so that we have both SMA starting a the same time.
+  df = df.dropna() 
+
+  # We compute our death cross
+  df["death_cross"] = df.apply(lambda row: 1 if row[f"50_sma"] < row[f"200_sma"]  else 0, axis=1)
+
+  # To store when our death crosses are happening
+  list_death_cross_ts = []
+  first_death_cross = False
+
+  # We take the date where the first 50 SMA < 200 SMA appears
+  for idx, each in df["death_cross"].iteritems():
+      if each == 1:
+          # If its the first death cross we see we add the timestamp
+          if first_death_cross:
+              list_death_cross_ts.append(idx)
+              first_death_cross = False
+      else:
+          first_death_cross = True
+
+  # We plot our prices / SMAs and Death Cross dates
+  fig, axes = plt.subplots(1,1, figsize=(8,4))
+  df[["200_sma","50_sma","Adj Close"]].plot(figsize=(8,4), grid=True, title="SMA 50 vs SMA 200 on "+name+" prices", ax=axes)
+
+  for each in list_death_cross_ts:
+      axes.axvline(x=each, label="Death Cross", c="red")
+      
+  axes.legend()
+  fig.tight_layout()
+  plt.savefig("death_cross_"+name+".png")
+####################################
+
+
+
+####################################
+# Combined Cross calculator        #
+def crosses(name, period, interval):
+  df = yf.download(name, period=period, interval=interval)
+
+  # We compute our simple moving averages
+  df["50_sma"] = df["Adj Close"].rolling(50).mean()
+  df["200_sma"] = df["Adj Close"].rolling(200).mean()
+
+  # This is important so that we have both SMA starting a the same time.
+  df = df.dropna() 
+
+  # We compute our death cross
+  df["death_cross"] = df.apply(lambda row: 1 if row[f"50_sma"] < row[f"200_sma"]  else 0, axis=1)
+
+  # To store when our death crosses are happening
+  list_death_cross_ts = []
+  first_death_cross = False
+
+  # We take the date where the first 50 SMA < 200 SMA appears
+  for idx, each in df["death_cross"].iteritems():
+      if each == 1:
+          # If its the first death cross we see we add the timestamp
+          if first_death_cross:
+              list_death_cross_ts.append(idx)
+              first_death_cross = False
+      else:
+          first_death_cross = True
+
+  # We compute our 50 SMA > 200 SMA
+  df["golden_cross"] = df.apply(lambda row: 1 if row[f"50_sma"] > row[f"200_sma"]  else 0, axis=1)
+
+  # To store when our golden cross are happening
+  list_golden_cross_ts = []
+  first_golden_cross = False
+
+  # We take the date where the first 50 SMA > 200 SMA appears
+  for idx, each in df["golden_cross"].iteritems():
+      if each == 1:
+          # If its the first golden cross we see we add the timestamp
+          if first_golden_cross:
+              list_golden_cross_ts.append(idx)
+              first_golden_cross = False
+      else:
+          first_golden_cross = True
+
+  # We plot our prices / SMAs and Death Cross dates
+  fig, axes = plt.subplots(1,1, figsize=(8,4))
+  df[["200_sma","50_sma","Adj Close"]].plot(figsize=(8,4), grid=True, title="SMA 50 vs SMA 200 on "+name+" prices", ax=axes)
+
+  for each in list_death_cross_ts:
+      axes.axvline(x=each, label="Death Cross", c="red")
+  for each in list_golden_cross_ts:
+    axes.axvline(x=each, label="Golden Cross", c="gold")
+      
+
+  axes.legend()
+  fig.tight_layout()
+  plt.savefig("crosses_"+name+".png")
+####################################
+
+
 

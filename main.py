@@ -27,7 +27,7 @@ print('How many data points? (possible: 1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 
 interval = input()
 print(yf.Ticker(name).history(period=period,interval=interval))
 ff.fib_retracement(name, period, interval)
-ff.golden_cross(name, period, interval)
+ff.crosses(name, period, interval)
 
 
 ##############
